@@ -1,18 +1,50 @@
-import React from 'react';
+import React, { useState } from 'react';
 import './style.css';
-import { Link } from 'react-router-dom';
+import { Link, useHistory } from 'react-router-dom';
 import heroesImg from '../../assets/heroes.png';
 import logoImg from '../../assets/logo.svg';
 import { FiLogIn } from 'react-icons/fi';
+import api from '../services/api';
 
 export default function Logon() {
+
+    const history = useHistory();
+    
+    const [id, setId] = useState('');
+
+    async function handleLogin(e) {
+        e.preventDefault();
+
+        try {
+            const response = await api.post('sessions', { id });
+
+            localStorage.setItem('ongId', id);
+            localStorage.setItem('ongName', response.data.name);
+
+            history.push('/profile');
+        } catch (err) {
+            alert(`Falha no login, tente novamente.`);
+        }
+    };
+    
+    if (localStorage.getItem('page')){        
+
+        alert(`Você tentou acessar a pagina ${ localStorage.getItem('page') } antes de efetuar o login, por favor efetue o login, caso não tenha cadastro, clique no link abaixo para cadastrar a sua ONG. `);
+        localStorage.clear();
+    };
+
     return (
         <div className="logon-container">
             <section className="form">
                 <img src={logoImg} alt="Be The Hero" />
-                <form>
+                <form onSubmit={handleLogin}>
                     <h1>Faça seu logon</h1>
-                    <input type="text" placeholder="Sua ID" />
+                    <input 
+                        type="text" 
+                        placeholder="Sua ID" 
+                        value={id}
+                        onChange={e => setId(e.target.value)}
+                    />
                     <button className="button" type="submit">Entrar</button>
                     <Link className="back-link" to="/register">
                         <FiLogIn size={16} color="#e02041" />
